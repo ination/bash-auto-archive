@@ -318,7 +318,7 @@ if [ $build_setbuildversion_auto = true ];then
 
     build_setbuildversion_value=$result
 
-    echo "  --- bulid version ¥oldBulidVersion auto increace to $build_setbuildversion_value"
+    echo "  --- bulid version $oldBulidVersion auto increace to $build_setbuildversion_value"
     echo ""
 
     echo "--- end auto incrase build version "
