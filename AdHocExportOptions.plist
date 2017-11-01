@@ -1,3 +1,5 @@
 {
 	method = "ad-hoc";
+	compileBitcode = NO;
+	thinning = "<none>";
 }

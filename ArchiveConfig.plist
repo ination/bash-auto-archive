@@ -1,12 +1,10 @@
 {
-	"ipconfig_path" = "~/Object/xxxx/IPConfig.h";
-	"svn_work_path" = "~/Object/xxxxxxx";
+	"ipconfig_path" = "/Users/ination/Object/100/IOS/Branch/diandi100/diandi100_E/Communication/IPConfig.h";
+	"svn_work_path" = "/Users/ination/Object/100/\U70b9\U6ef4100\U6587\U6863/IOS\U5ba2\U6237\U7aef\U5b89\U88c5\U5305";
 	"project_name" = Communication;
 	"project_type" = workspace;
 	scheme = Communication;
-	"appStoreProvisioningProfile" = "74200373-abbe-4600-aaf2-424ee354534a";
-	"adHocProvisioningProfile" = "ec246e64-57a4-43a9-a918-34f08e1f716f";
-	codeSignIdentity = "iPhone Distribution: xxxxxx ";
-	"app_info_path" = "~/Object/xxxx/Info.plist";
-	"project_path" = "~/Object/xxxx";
+	codeSignIdentity = "iPhone Distribution: Wuhan Tianyu Communication Technology CO. LTD (ZPD9SMYDAB)";
+	"app_info_path" = "/Users/ination/Object/100/IOS/Branch/diandi100/diandi100_E/Communication/Communication-Info.plist";
+	"project_path" = "/Users/ination/Object/100/IOS/Branch/diandi100/diandi100_E";
 }

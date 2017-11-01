@@ -215,9 +215,13 @@ archiveConfigPath=${archiveShellPath}/ArchiveConfig.plist
 project_path=$(/usr/libexec/PlistBuddy -c "print project_path" ${archiveConfigPath})
 app_info_path=$(/usr/libexec/PlistBuddy -c "print app_info_path" ${archiveConfigPath})
 
-codeSignIdentity=$(/usr/libexec/PlistBuddy -c "print codeSignIdentity" ${archiveConfigPath})
-adHocProvisioningProfile=$(/usr/libexec/PlistBuddy -c "print adHocProvisioningProfile" ${archiveConfigPath})
-appStoreProvisioningProfile=$(/usr/libexec/PlistBuddy -c "print appStoreProvisioningProfile" ${archiveConfigPath})
+#xcode 采用自动管理证书
+#
+#codeSignIdentity=$(/usr/libexec/PlistBuddy -c "print codeSignIdentity" ${archiveConfigPath})
+#adHocProvisioningProfile=$(/usr/libexec/PlistBuddy -c "print adHocProvisioningProfile" ${archiveConfigPath})
+#appStoreProvisioningProfile=$(/usr/libexec/PlistBuddy -c "print appStoreProvisioningProfile" ${archiveConfigPath})
+#
+
 project_name=$(/usr/libexec/PlistBuddy -c "print project_name" ${archiveConfigPath})
 project_type=$(/usr/libexec/PlistBuddy -c "print project_type" ${archiveConfigPath})
 scheme=$(/usr/libexec/PlistBuddy -c "print scheme" ${archiveConfigPath})
@@ -326,7 +330,7 @@ if [ $build_setbuildversion_auto = true ];then
 
 fi
 
-# 修改编译版本号
+#修改编译版本号
 if [ $build_setbuildversion = true ];then
     echo "--- begin modify build version in $app_info_path"
     echo ""
@@ -461,12 +465,15 @@ if [ "$project_type" = "workspace" ];then
     echo "  --- archive $project_name.xcworkspace->$scheme ---"
     echo ""
 
-    xcodebuild archive -workspace "$project_name.xcworkspace" -scheme "$scheme" -configuration "$configuration" -archivePath "$archivePath" CODE_SIGN_IDENTITY="$codeSignIdentity" PROVISIONING_PROFILE="$appStoreProvisioningProfile"
+#    xcodebuild archive -workspace "$project_name.xcworkspace" -scheme "$scheme" -configuration "$configuration" -archivePath "$archivePath" CODE_SIGN_IDENTITY="$codeSignIdentity" PROVISIONING_PROFILE="$appStoreProvisioningProfile"
+    xcodebuild archive -workspace "$project_name.xcworkspace" -scheme "$scheme" -configuration "$configuration" -archivePath "$archivePath"
 else
     echo "  --- archive $project_name.xcodeproj->$scheme ---"
     echo ""
 
-    xcodebuild archive -project "$project_name.xcodeproj" -scheme "$scheme" -configuration "$configuration" -archivePath "$archivePath" CODE_SIGN_IDENTITY="$codeSignIdentity" PROVISIONING_PROFILE="$appStoreProvisioningProfile"
+#    xcodebuild archive -project "$project_name.xcodeproj" -scheme "$scheme" -configuration "$configuration" -archivePath "$archivePath" CODE_SIGN_IDENTITY="$codeSignIdentity" PROVISIONING_PROFILE="$appStoreProvisioningProfile"
+
+    xcodebuild archive -project "$project_name.xcodeproj" -scheme "$scheme" -configuration "$configuration" -archivePath "$archivePath"
 fi
 
 echo "----------------  end archive of commond ---------------"
@@ -484,14 +491,16 @@ if [ $need_export_adhoc = true ];then
     echo $ipa_name
     echo ""
 
-    echo "  --- begin exportIpa of commond"
+    exportPath=${archiveShellPath}/ipa/${ymdDir}
+
+    echo "  --- begin exportIpa to ${ymdDir} "
     echo ""
 
-    exportPath=${archiveShellPath}/ipa/${ymdDir}
+
     exportOptionsPlist=${archiveShellPath}/AdHocExportOptions.plist
     xcodebuild -exportArchive -archivePath "$archivePath" -exportOptionsPlist "$exportOptionsPlist" -exportPath "$exportPath"
-
-    echo "  --- end exportIpa of commond"
+# -exportProvisioningProfile "ProvisioningProfileName"
+    echo "  --- begin exportIpa to ${ymdDir} "
     echo ""
 
     # 修改ipa名称
