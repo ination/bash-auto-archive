@@ -1,0 +1,10 @@
+{
+	"ipconfig_path" = "/Users/ination/Object/xxxxx/IPConfig.h";
+	"svn_work_path" = "/Users/ination/Object/xxxxx";
+	"project_name" = Communication;
+	"project_type" = workspace;
+	scheme = Communication;
+	codeSignIdentity = "iPhone Distribution: xxxxxxx";
+	"app_info_path" = "/Users/ination/Object/xxxxxx/Communication-Info.plist";
+	"project_path" = "/Users/ination/Object/xxxxxx";
+}

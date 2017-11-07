@@ -17,6 +17,7 @@ cd ~/Library/MobileDevice/Provisioning\ Profiles
 echo "--------   cd in $(pwd)"
 
 echo "--------   begin read files"
+echo ""
 for file in *
 do
 if test -f $file
@@ -26,6 +27,8 @@ ppfilecontent=$(security cms -D -i $file)
 echo "$ppfilecontent" &>"${plistpath}"
 name=$(/usr/libexec/PlistBuddy -c "print Name" ${plistpath})
 echo "    ----   name : $name"
+echo ""
+
 
 
 #echo $file 是文件
@@ -40,6 +43,7 @@ echo "-----   end read files"
 
 cd "${shellpath}"
 echo "-----   cd in $(pwd)"
+echo ""
 
 
 

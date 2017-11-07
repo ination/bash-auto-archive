@@ -8,11 +8,13 @@
 #
 # 参数说明：
 #
-#         -p Name   平台标识码 （Develop 连接开发服务器, Debug 连接测试服务器, Release 连接正式服务器,Prepublish 连接预发布服务器）
-#		  -t NAME	需要编译的target的名称（AdHoc AppStore All）
+#         -p name   平台标识码 （Develop 连接开发服务器, Debug 连接测试服务器, Release 连接正式服务器,Prepublish 连接预发布服务器）
+#		  -t name	需要编译的target的名称（AdHoc AppStore All）
 #                   AdHoc 在目录archive和ipa中可以找到，
 #                   AppStore 只在-p Release有效，默认的xcode的Organizer中找到,
 #                   All 只在-p Release有效,同时在Organizer 和 archive 中各有一份)
+#         -n name   项目名称，ArchiveConfig.plist 中key值
+#         -l        打印出ArchiveConfig.plist
 #         -v		设置版本号vesion （-v 4.2.0, 无 不修改 ）
 #         -b		编译版本号build （-b 自动增加, -b 1.0.1 手动设置，无 不修改）
 #         -e        编译完成后是否发送Email (Yes No) (暂未实现)
@@ -30,6 +32,58 @@ if [ $# -lt 1 ];then
     exit 2
 fi
 
+function uesage()
+{
+    echo "*************** archive.sh help ***************"
+    echo ""
+    echo "@brife"
+    echo " 家校帮打包脚本，目的解放复杂的打包流程"
+    echo ""
+    echo "@note"
+    echo " bash ./archive.sh -p Debug -t AdHoc -n JiaXiaoBang"
+    echo " bash ./archive.sh -p Release -t AppStore -n JiaXiaoBang"
+    echo ""
+    echo "@param"
+    echo " -p           服务器平台连接标识码"
+    echo "                Develop 连接开发服务器"
+    echo "                Debug 连接测试服务器"
+    echo "                Prepublish 连接预发布服务器"
+    echo "                Release 连接正式服务器"
+    echo ""
+    echo " -t           需要编译的target的名称"
+    echo "                AdHoc 输出测试包"
+    echo "                AppStore  -p Release有效"
+    echo "                All -p Release有效"
+    echo ""
+    echo "-n            需要编译项目名称"
+    echo "                ArchiveConfig.plist 中key值"
+    echo ""
+    echo " -v           设置版本号vesion"
+    echo "                -v 4.2.0 ，手动修改版本号"
+    echo "                无 不修改"
+    echo ""
+    echo " -b           编译版本号build"
+    echo "                -b 自动增加"
+    echo "                -b 1.0.1 手动设置"
+    echo "                无 不修改"
+    echo ""
+    echo " -e           编译完成后是否发送Email (Yes No)"
+    echo ""
+    echo " -s           编译完成后是否上传到svn (Yes No)"
+    echo ""
+    echo " -l           打印出ArchiveConfig.plist"
+    echo ""
+    echo " -h           帮助"
+    echo ""
+    echo "**********************************************"
+}
+
+function list_project_names()
+{
+    echo $(/usr/libexec/PlistBuddy -c "print" $(pwd)/ArchiveConfig.plist)
+}
+
+build_projectname=""
 build_target=AdHoc
 build_platform=Release
 build_opsendEmial=false
@@ -42,7 +96,7 @@ build_setbuildversion=false
 build_setbuildversion_auto=false
 build_setbuildversion_value=""
 
-param_pattern=":p:t:v:b:e:s:h"
+param_pattern=":p:t:n:v:b:e:s:lh"
 while getopts $param_pattern optname
 do
     case "$optname" in
@@ -64,6 +118,11 @@ do
         fi
         build_target=$OPTARG
         echo "target parameter is $build_target"
+        echo ""
+        ;;
+    "n")
+        build_projectname=$OPTARG
+        echo "projectname parameter is $build_projectname"
         echo ""
         ;;
     "v")
@@ -118,45 +177,13 @@ do
     	echo "updateSvn parameter is $build_opupdateSvn"
         echo ""
         ;;
+    "l")
+        list_project_names
+        exit
+        ;;
     "h")
-        echo "*************** archive.sh help ***************"
-        echo ""
-        echo "@brife"
-        echo " 家校帮打包脚本，目的解放复杂的打包流程"
-        echo ""
-        echo "@note"
-        echo " bash ./archive.sh -p Debug -t AdHoc"
-        echo " bash ./archive.sh -p Release -t AppStore"
-        echo ""
-        echo "@param"
-        echo " -p           服务器平台连接标识码"
-        echo "               Develop 连接开发服务器"
-        echo "               Debug 连接测试服务器"
-        echo "               Prepublish 连接预发布服务器"
-        echo "               Release 连接正式服务器"
-        echo ""
-        echo " -t           需要编译的target的名称"
-        echo "               AdHoc 输出测试包"
-        echo "               AppStore  -p Release有效"
-        echo "               All -p Release有效"
-        echo ""
-        echo " -v           设置版本号vesion"
-        echo "               -v 4.2.0 ，手动修改版本号"
-        echo "               无 不修改"
-        echo ""
-        echo " -b           编译版本号build"
-        echo "               -b 自动增加"
-        echo "               -b 1.0.1 手动设置"
-        echo "               无 不修改"
-        echo ""
-        echo " -e           编译完成后是否发送Email (Yes No)"
-        echo ""
-        echo " -s           编译完成后是否上传到svn (Yes No)"
-        echo ""
-        echo " -h           帮助"
-        echo ""
-        echo "**********************************************"
-        exit 2
+        uesage
+        exit 1
         ;;
     *)
         echo "Error! Unknown error while processing options"
@@ -165,6 +192,16 @@ do
         ;;
     esac
 done
+
+#判断项目
+if [ "$build_projectname" = "" ];then
+    echo "--- Error ----"
+    echo ""
+    echo "  --- invalid build_projectname parameter of $build_projectname ---"
+    echo ""
+    echo "use bash ./archive.sh -h for some help"
+    exit
+fi
 
 need_export_adhoc=true
 need_copy_archive_to_organizer=false
@@ -211,9 +248,39 @@ fi
 echo "--- begin read ArchiveConfig.plist"
 echo ""
 archiveShellPath=$(pwd)
+echo "--- archiveShellPath is $archiveShellPath"
+echo ""
 archiveConfigPath=${archiveShellPath}/ArchiveConfig.plist
-project_path=$(/usr/libexec/PlistBuddy -c "print project_path" ${archiveConfigPath})
-app_info_path=$(/usr/libexec/PlistBuddy -c "print app_info_path" ${archiveConfigPath})
+projectConfigName=$(/usr/libexec/PlistBuddy -c "print $build_projectname" ${archiveConfigPath})
+echo "  ----projectConfigName is $projectConfigName"
+echo ""
+echo "--- end read ArchiveConfig.plist"
+echo ""
+
+#判读projectConfig.plist是否存在
+if [ "$projectConfigName" = "" ];then
+    echo "--- Error ----"
+    echo ""
+    echo "  --- not found projectConfigName of $build_projectname "
+    echo ""
+    exit
+fi
+
+projectConfigPath=${archiveShellPath}/Projects/${projectConfigName}
+if [ ! -f "$projectConfigPath" ]; then
+    echo "--- Error ----"
+    echo ""
+    echo "  --- projectConfig file $projectConfigPath is not exist"
+    echo ""
+    exit
+fi
+
+# 读取ProjectConfig.plist
+echo "--- begin read $projectConfigName"
+echo ""
+
+project_path=$(/usr/libexec/PlistBuddy -c "print project_path" ${projectConfigPath})
+app_info_path=$(/usr/libexec/PlistBuddy -c "print app_info_path" ${projectConfigPath})
 
 #xcode 采用自动管理证书
 #
@@ -222,19 +289,17 @@ app_info_path=$(/usr/libexec/PlistBuddy -c "print app_info_path" ${archiveConfig
 #appStoreProvisioningProfile=$(/usr/libexec/PlistBuddy -c "print appStoreProvisioningProfile" ${archiveConfigPath})
 #
 
-project_name=$(/usr/libexec/PlistBuddy -c "print project_name" ${archiveConfigPath})
-project_type=$(/usr/libexec/PlistBuddy -c "print project_type" ${archiveConfigPath})
-scheme=$(/usr/libexec/PlistBuddy -c "print scheme" ${archiveConfigPath})
+project_name=$(/usr/libexec/PlistBuddy -c "print project_name" ${projectConfigPath})
+project_type=$(/usr/libexec/PlistBuddy -c "print project_type" ${projectConfigPath})
+scheme=$(/usr/libexec/PlistBuddy -c "print scheme" ${projectConfigPath})
 
-ipconfig_path=$(/usr/libexec/PlistBuddy -c "print ipconfig_path" ${archiveConfigPath})
+ipconfig_path=$(/usr/libexec/PlistBuddy -c "print ipconfig_path" ${projectConfigPath})
 
-echo "--- archiveShellPath is $archiveShellPath"
+echo "  --- xcode_Info_Plist_path is $app_info_path"
 echo ""
-echo "--- xcode_Info_Plist_path is $app_info_path"
+echo "  --- project_path is $project_path"
 echo ""
-echo "--- project_path is $project_path"
-echo ""
-echo "--- end read ArchiveConfig.plist"
+echo "--- end read $projectConfigPath"
 echo ""
 
 # 修改xcode info.plist
@@ -374,23 +439,52 @@ echo ""
 echo "--- end modify server_link_flag in $ipconfig_path"
 echo ""
 
-# 创建archive文件夹
 
-echo "--- begin remove and create archive dir in $(pwd)"
+# 创建archive文件夹
+echo "--- begin create archive dir in $(pwd)"
 echo ""
 
 if [ -d ./archive ];then
-	rm -rf archive
+    echo "  --- archive dir exist in $(pwd)"
+    echo ""
+else
+    mkdir archive
+    echo "  --- create archive in $(pwd)"
+    echo ""
 fi
-mkdir archive
 
-echo "--- end remove and create archive dir in $(pwd)"
+echo "--- end  create archive dir in $(pwd)"
 echo ""
 
-echo "--- begin create ipa dir in $(pwd)"
+# archive 目录下创建项目文件夹
+cd archive
+echo "--- cd archive, pwd is $(pwd)"
+echo ""
+
+echo "--- begin remove and create $build_projectname dir in archive"
+echo ""
+
+if [ -d ./${build_projectname} ];then
+    rm -rf ${build_projectname}
+    echo "  --- remove $build_projectname dir"
+    echo ""
+fi
+mkdir ${build_projectname}
+echo "  --- create $build_projectname dir"
+echo ""
+
+echo "--- end remove and create $build_projectname dir in archive"
+echo ""
+
+# 返回archiveShellPath
+cd ${archiveShellPath}
+echo "--- cd ${archiveShellPath}, pwd is $(pwd)"
 echo ""
 
 # 创建ipa文件夹
+echo "--- begin create ipa dir in $(pwd)"
+echo ""
+
 if [ -d ./ipa ];then
 #	rm -rf ipa
     echo "  --- ipa dir exist in $(pwd)"
@@ -405,25 +499,49 @@ fi
 echo "--- end create ipa dir in $(pwd)"
 echo ""
 
-cd ipa
 
-# 创建年月日文件夹
+# ipa 目录下创建项目文件夹
+cd ipa
+echo "--- cd ipa, pwd is $(pwd)"
+echo ""
+
+echo "--- begin create $build_projectname dir in ipa"
+echo ""
+
+if [ -d ./${build_projectname} ];then
+    echo "  --- ${build_projectname} exist in ipa"
+    echo ""
+elif [ ! -d ./${build_projectname} ];then
+    mkdir ${build_projectname}
+    echo "  --- create ${build_projectname} in ipa"
+    echo ""
+fi
+
+echo "--- end create sub dir in ipa"
+echo ""
+
+# ${build_projectname} 目录下创建年月日文件夹
+cd ${build_projectname}
+echo "--- cd ${build_projectname}, pwd is $(pwd)"
+echo ""
+
+# 年月日
 ymdDir=`date '+%Y-%m-%d'`
 
-echo "--- begin create sub dir in $(pwd)"
+echo "--- begin create sub dir in ${build_projectname}"
 echo ""
 
 if [ -d ./${ymdDir} ];then
 #	rm -rf ipa
-    echo "  --- ${ymdDir} exist in $(pwd)"
+    echo "  --- ${ymdDir} exist in ${build_projectname}"
     echo ""
 elif [ ! -d ./${ymdDir} ];then
     mkdir ${ymdDir}
-    echo "  --- create ${ymdDir} in $(pwd)"
+    echo "  --- create ${ymdDir} in ${build_projectname}"
     echo ""
 fi
 
-echo "--- end create sub dir in $(pwd)"
+echo "--- end create sub dir in ${build_projectname}"
 echo ""
 
 # 清理构建目录 [Product -> Clean]
@@ -451,6 +569,7 @@ curDate=`date '+%Y-%m-%d_%H-%M-%S'`
 #xcode
 xcode_organizer_archive_date=`date '+%y-%m-%d %p%-l.%M'`
 #archive名称
+#archive_name="${scheme}_${bundleShortVersion}_${curDate}_${build_platform}"
 archive_name="${scheme}_${bundleShortVersion}_${curDate}_${build_platform}"
 echo "-- archive name $archive_name "
 echo ""
@@ -459,7 +578,7 @@ echo ""
 echo "----------------  begin archive of commond ---------------"
 echo ""
 
-archivePath=${archiveShellPath}/archive/${archive_name}.xcarchive
+archivePath=${archiveShellPath}/archive/${build_projectname}/${archive_name}.xcarchive
 if [ "$project_type" = "workspace" ];then
 
     echo "  --- archive $project_name.xcworkspace->$scheme ---"
@@ -491,7 +610,7 @@ if [ $need_export_adhoc = true ];then
     echo $ipa_name
     echo ""
 
-    exportPath=${archiveShellPath}/ipa/${ymdDir}
+    exportPath=${archiveShellPath}/ipa/${build_projectname}/${ymdDir}
 
     echo "  --- begin exportIpa to ${ymdDir} "
     echo ""
