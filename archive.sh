@@ -617,7 +617,7 @@ if [ $need_export_adhoc = true ];then
 
 
     exportOptionsPlist=${archiveShellPath}/AdHocExportOptions.plist
-    xcodebuild -exportArchive -archivePath "$archivePath" -exportOptionsPlist "$exportOptionsPlist" -exportPath "$exportPath"
+    xcodebuild -exportArchive -archivePath "$archivePath" -exportOptionsPlist "$exportOptionsPlist" -exportPath "$exportPath" -allowProvisioningUpdates
 # -exportProvisioningProfile "ProvisioningProfileName"
     echo "  --- begin exportIpa to ${ymdDir} "
     echo ""
@@ -644,7 +644,11 @@ if [ $need_copy_archive_to_organizer = true ];then
 	echo ""
 
     #进入xcode的Archives目录
-    cd ~/Library/Developer/Xcode/Archives
+    cd ~/Library/Developer/Xcode/
+    if [ ! -d ./Archives ];then
+        mkdir Archives
+    fi
+    cd Archives
     #在xcode的Archives目录下创建年月日文件夹
     xcodeArchivesSubYMDDir=`date '+%Y-%m-%d'`
 
